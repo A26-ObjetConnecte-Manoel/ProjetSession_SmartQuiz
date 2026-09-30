@@ -1,18 +1,32 @@
 #include <Arduino.h>
+#include <Wire.h>
 
-// put function declarations here:
-int myFunction(int, int);
+#include "../include/config/Config.h"
+#include "../include/core/Application.h"
+#include "../include/input/boutonInput.h"
+#include "../include/output/SerialOutput.h"
 
-void setup() {
-  // put your setup code here, to run once:
-  int result = myFunction(2, 3);
+Application app;
+
+SerialOutput serialOutput;
+
+Bouton bouton(BOUTONJ1);
+
+void setup()
+{
+  Serial.begin(SERIAL_BAUD_RATE);
+
+  delay(1000);
+
+  app.addInput(&bouton);
+  app.addOutput(&serialOutput);
+
+  app.begin();
+
+  Serial.println("Ariane V3 - Validation des donnees demarree.");
 }
 
-void loop() {
-  // put your main code here, to run repeatedly:
-}
-
-// put function definitions here:
-int myFunction(int x, int y) {
-  return x + y;
+void loop()
+{
+  app.update();
 }

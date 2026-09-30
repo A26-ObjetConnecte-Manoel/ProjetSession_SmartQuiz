@@ -1,0 +1,66 @@
+classDiagram
+    class IInputSource {
+        <<interface>>
+        +begin()
+        +update()
+        +available() bool
+        +read() SensorData
+        +getName() String
+    }
+
+    class IOutputTarget {
+        <<interface>>
+        +begin()
+        +send(SensorData data) bool
+        +getName() String
+    }
+
+    class SensorData {
+        -source : String
+        -type : String
+        -value : float
+        -unit : String
+        -timestamp : unsigned long
+        +getSource() String
+        +getType() String
+        +getValue() float
+        +getUnit() String
+        +getTimestamp() unsigned long
+    }
+
+    class Bouton {
+        -m_pin : int
+        -m_lastState : bool
+        -m_debouncedState : bool
+        -m_lastDebounceTime : unsigned long
+        -m_debounceDelay : unsigned long
+        +begin()
+        +update()
+        +available() bool
+        +read() SensorData
+        +getName() String
+    }
+
+    class SerialOutput {
+        +begin()
+        +send(SensorData data) bool
+        +getName() String
+    }
+
+    class Application {
+        -inputs : IInputSource*[MAX_INPUTS]
+        -outputs : IOutputTarget*[MAX_OUTPUTS]
+        -inputCount : int
+        -outputCount : int
+        +addInput(IInputSource* input)
+        +addOutput(IOutputTarget* output)
+        +begin()
+        +update()
+    }
+
+    IInputSource <|.. Bouton
+    IOutputTarget <|.. SerialOutput
+    IInputSource ..> SensorData : produit
+    IOutputTarget ..> SensorData : consomme
+    Application "1" o-- "0..10" IInputSource
+    Application "1" o-- "0..10" IOutputTarget
