@@ -10,7 +10,8 @@ Application app;
 
 SerialOutput serialOutput;
 
-Bouton bouton(BOUTONJ1);
+Bouton bouton1(BOUTONJ1);
+Bouton bouton2(BOUTONJ2);
 
 void setup()
 {
@@ -18,7 +19,8 @@ void setup()
 
   delay(1000);
 
-  app.addInput(&bouton);
+  app.addInput(&bouton1);
+  app.addInput(&bouton2);
   app.addOutput(&serialOutput);
 
   app.begin();
