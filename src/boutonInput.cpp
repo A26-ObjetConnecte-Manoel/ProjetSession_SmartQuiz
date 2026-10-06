@@ -45,3 +45,7 @@ SensorData Bouton::read()
 
     return SensorData(getName(), "bouton", 1.0f, "", millis());
 }
+String Bouton::getName() const
+{
+    return "Bouton (pin " + String(m_pin) + ")";
+}

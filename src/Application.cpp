@@ -46,6 +46,14 @@ void Application::addInput(IInputSource *input)
         inputCount++;
     }
 }
+void Application::addOutput(IOutputTarget *output)
+{
+    if (outputCount < MAX_OUTPUTS)
+    {
+        outputs[outputCount] = output;
+        outputCount++;
+    }
+}
 
 void Application::update()
 {
@@ -59,13 +67,6 @@ void Application::update()
             {
                 outputs[j]->send(data);
             }
-
-            Serial.printf(
-                "Donnee invalide rejetee [%s] %s = %.2f %s\n",
-                data.getSource().c_str(),
-                data.getType().c_str(),
-                data.getValue(),
-                data.getUnit().c_str());
         }
     }
 }
