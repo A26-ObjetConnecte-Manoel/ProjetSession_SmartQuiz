@@ -1,4 +1,4 @@
-#include "../include/config/Config.h"
+
 #include "../include/services/DataValidator.h"
 #include <Arduino.h>
 
@@ -8,21 +8,16 @@ bool DataValidator::isValid(const SensorData &data)
         return false;
     if (!isTimestampValid(data.getTimestamp()))
         return false;
+
     if (data.getType() == "bouton")
-    {
-        if (!isButtonValid(data))
-        {
-            return false;
-        }
         return isButtonValid(data);
-    }
+
     return false;
 }
+
 bool DataValidator::isButtonValid(const SensorData &data)
 {
-    if (data.getValue() != 1.0f)
-        return false;
-    return true;
+    return data.getValue() == 1.0f;
 }
 bool DataValidator::isSourceValid(const String &source)
 {
