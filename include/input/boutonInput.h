@@ -6,13 +6,14 @@
 class Bouton : public IInputSource
 {
 private:
-    int m_pin;
+    int pin;
 
-    bool m_lastState;
-    bool m_debouncedState;
+    bool lastState;
+    bool debouncedState;
+    bool pressed;
 
-    unsigned long m_lastDebounceTime;
-    unsigned long m_debounceDelay;
+    unsigned long lastDebounceTime;
+    unsigned long debounceDelay;
 
 public:
     Bouton(int pin, unsigned long debounceDelay = 50);

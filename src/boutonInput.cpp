@@ -1,45 +1,50 @@
 #include "../include/input/boutonInput.h"
 
 Bouton::Bouton(int pin, unsigned long debounceDelay)
-    : m_pin(pin),
-      m_lastState(HIGH),
-      m_debouncedState(HIGH),
-      m_lastDebounceTime(0),
-      m_debounceDelay(debounceDelay)
+    : pin(pin),
+      lastState(HIGH),
+      debouncedState(HIGH),
+      pressed(false),
+      lastDebounceTime(0),
+      debounceDelay(debounceDelay)
 {
 }
 
 void Bouton::begin()
 {
-    pinMode(m_pin, INPUT_PULLUP);
-    m_lastState = digitalRead(m_pin);
-    m_debouncedState = m_lastState;
+    pinMode(pin, INPUT_PULLUP);
+    lastState = digitalRead(pin);
+    debouncedState = lastState;
 }
 
 void Bouton::update()
 {
-    bool reading = digitalRead(m_pin);
+    bool reading = digitalRead(pin);
 
-    if (reading != m_lastState)
+    if (reading != lastState)
+        lastDebounceTime = millis();
+
+    if ((millis() - lastDebounceTime) >= debounceDelay && reading != debouncedState)
     {
-        m_lastDebounceTime = millis();
+        debouncedState = reading;
+        if (debouncedState == LOW)
+            pressed = true;
     }
 
-    if ((millis() - m_lastDebounceTime) >= m_debounceDelay)
-    {
-        m_debouncedState = reading;
-    }
-
-    m_lastState = reading;
+    lastState = reading;
 }
 
 bool Bouton::available()
 {
-
     update();
-
-    return (m_debouncedState == LOW);
+    if (pressed)
+    {
+        pressed = false;
+        return true;
+    }
+    return false;
 }
+
 SensorData Bouton::read()
 {
 
@@ -47,5 +52,5 @@ SensorData Bouton::read()
 }
 String Bouton::getName() const
 {
-    return "Bouton (pin " + String(m_pin) + ")";
+    return "Bouton (pin " + String(pin) + ")";
 }
