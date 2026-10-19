@@ -1,6 +1,7 @@
 #include "../include/core/Application.h"
 #include <Arduino.h>
 #include "../include/config/Config.h"
+#include "../include/services/DataValidator.h"
 
 Application::Application()
     : inputCount(0),
@@ -59,14 +60,21 @@ void Application::update()
 {
     for (int i = 0; i < inputCount; i++)
     {
-        if (inputs[i]->available())
-        {
-            SensorData data = inputs[i]->read();
+        if (!inputs[i]->available())
+            continue;
 
-            for (int j = 0; j < outputCount; j++)
-            {
-                outputs[j]->send(data);
-            }
+        SensorData data = inputs[i]->read();
+
+        if (!DataValidator::isValid(data))
+        {
+            Serial.print("[REJET] Donnee invalide de ");
+            Serial.println(data.getSource());
+            continue;
+        }
+
+        for (int j = 0; j < outputCount; j++)
+        {
+            outputs[j]->send(data);
         }
     }
 }
