@@ -3,10 +3,12 @@
 #include "../include/config/Config.h"
 #include "../include/services/DataValidator.h"
 
-Application::Application()
-    : game(TIME_MAX_GAME_MS),
+Application::Application(unsigned long diagnosticIntervalMs, QuizStateService &stateService)
+    : stateService(stateService),
       inputCount(0),
-      outputCount(0)
+      outputCount(0),
+      lastDiagnosticMs(0),
+      diagnosticIntervalMs(diagnosticIntervalMs)
 
 {
     for (int i = 0; i < MAX_INPUTS; i++)
@@ -60,61 +62,89 @@ void Application::addOutput(IOutputTarget *output)
 
 void Application::update()
 {
-    handleSerialCommands();
-    for (int i = 0; i < inputCount; i++)
-    {
-        if (!inputs[i]->available())
-            continue;
-
-        SensorData data = inputs[i]->read();
-
-        if (!DataValidator::isValid(data))
-        {
-            Serial.print("[REJET] Donnee invalide de ");
-            Serial.println(data.getSource());
-            continue;
-        }
-
-        for (int j = 0; j < outputCount; j++)
-        {
-            outputs[j]->send(data);
-        }
-        game.onButtonPressed(playerFromSource(data.getSource()));
-    }
-    game.update();
-    printStateChange();
+    updateCommands();
+    updateInputs();
+    updateState();
+    updateDiagnostics();
 }
 
-void Application::handleSerialCommands()
+void Application::updateCommands()
 {
     if (!Serial.available())
         return;
-    char c = Serial.read();
+
+    char c = tolower(Serial.read());
+
     if (c == 's')
-        game.startRound();
+        stateService.startRound();
     else if (c == 'r')
-        game.reset();
-}
-void Application::printStateChange()
-{
-    if (!game.hasChanged())
-        return;
-    Serial.print("[ETAT] ");
-    Serial.print(QuizStateMachine::stateToString(game.getState()));
-    Serial.print(" | manche ");
-    Serial.print(game.getRoundNumber());
-    if (game.getState() == QuizState::GAGNANT)
+        stateService.reset();
+    else if (c != '\n' && c != '\r')
     {
-        Serial.print(" | gagnant : J");
-        Serial.print(game.getWinner());
+        Serial.print("[SmartQuiz] Commande inconnue: ");
+        Serial.println(c);
+    }
+}
+void Application::updateInputs()
+{
+    for (int i = 0; i < inputCount; i++)
+    {
+        if (inputs[i]->available())
+        {
+            SensorData data = inputs[i]->read();
+
+            if (DataValidator::isValid(data))
+            {
+                stateService.onButtonPressed(playerFromSource(data.getSource()));
+                for (int j = 0; j < outputCount; j++)
+                {
+                    outputs[j]->send(data);
+                }
+            }
+            else
+            {
+                stateService.setError();
+                Serial.println("[SmartQuiz] Donnee invalide rejetee.");
+            }
+        }
+    }
+}
+void Application::updateState()
+{
+    stateService.update();
+    if (!stateService.hasChanged())
+        return;
+    Serial.print("[SmartQuiz] Etat: ");
+    Serial.print(stateService.getStateName());
+    Serial.print(" | manche ");
+    Serial.print(stateService.getRoundNumber());
+    if (stateService.getState() == QuizState::GAGNANT)
+    {
+        Serial.print(" | gagnant: J");
+        Serial.print(stateService.getWinner());
     }
     Serial.println();
 }
+void Application::updateDiagnostics()
+{
+    if (millis() - lastDiagnosticMs >= diagnosticIntervalMs)
+    {
+        lastDiagnosticMs = millis();
+
+        Serial.println("[SmartQuiz] Systeme actif");
+        Serial.print("[SmartQuiz] Entrees: ");
+        Serial.println(inputCount);
+        Serial.print("[SmartQuiz] Sorties: ");
+        Serial.println(outputCount);
+        Serial.print("[SmartQuiz] Etat: ");
+        Serial.println(stateService.getStateName());
+    }
+}
 int Application::playerFromSource(const String &source)
 {
-    if (source == "Joueur1")
+    if (source == NOM_J1)
         return 1;
-    if (source == "Joueur2")
+    if (source == NOM_J2)
         return 2;
     return 0;
 }
