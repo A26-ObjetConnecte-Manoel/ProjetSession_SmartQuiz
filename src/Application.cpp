@@ -4,8 +4,10 @@
 #include "../include/services/DataValidator.h"
 
 Application::Application()
-    : inputCount(0),
+    : game(TIME_MAX_GAME_MS),
+      inputCount(0),
       outputCount(0)
+
 {
     for (int i = 0; i < MAX_INPUTS; i++)
     {
@@ -58,6 +60,7 @@ void Application::addOutput(IOutputTarget *output)
 
 void Application::update()
 {
+    handleSerialCommands();
     for (int i = 0; i < inputCount; i++)
     {
         if (!inputs[i]->available())
@@ -76,5 +79,42 @@ void Application::update()
         {
             outputs[j]->send(data);
         }
+        game.onButtonPressed(playerFromSource(data.getSource()));
     }
+    game.update();
+    printStateChange();
+}
+
+void Application::handleSerialCommands()
+{
+    if (!Serial.available())
+        return;
+    char c = Serial.read();
+    if (c == 's')
+        game.startRound();
+    else if (c == 'r')
+        game.reset();
+}
+void Application::printStateChange()
+{
+    if (!game.hasChanged())
+        return;
+    Serial.print("[ETAT] ");
+    Serial.print(QuizStateMachine::stateToString(game.getState()));
+    Serial.print(" | manche ");
+    Serial.print(game.getRoundNumber());
+    if (game.getState() == QuizState::GAGNANT)
+    {
+        Serial.print(" | gagnant : J");
+        Serial.print(game.getWinner());
+    }
+    Serial.println();
+}
+int Application::playerFromSource(const String &source)
+{
+    if (source == "Joueur1")
+        return 1;
+    if (source == "Joueur2")
+        return 2;
+    return 0;
 }

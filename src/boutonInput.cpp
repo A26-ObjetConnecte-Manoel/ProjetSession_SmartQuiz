@@ -1,7 +1,8 @@
 #include "../include/input/boutonInput.h"
 
-Bouton::Bouton(int pin, unsigned long debounceDelay)
+Bouton::Bouton(int pin, String name, unsigned long debounceDelay)
     : pin(pin),
+      name(name),
       lastState(HIGH),
       debouncedState(HIGH),
       pressed(false),
@@ -52,5 +53,5 @@ SensorData Bouton::read()
 }
 String Bouton::getName() const
 {
-    return "Bouton (pin " + String(pin) + ")";
+    return name;
 }

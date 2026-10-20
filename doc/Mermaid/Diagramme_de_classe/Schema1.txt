@@ -1,0 +1,120 @@
+classDiagram
+    class IInputSource {
+        <<interface>>
+        +begin()
+        +update()
+        +available() bool
+        +read() SensorData
+        +getName() String
+    }
+
+    class IOutputTarget {
+        <<interface>>
+        +begin()
+        +send(SensorData data) bool
+        +getName() String
+    }
+
+    class SensorData {
+        -source : String
+        -type : String
+        -value : float
+        -unit : String
+        -timestamp : unsigned long
+        +SensorData()
+        +SensorData(String source, String type, float value, String unit, unsigned long timestamp)
+        +getSource() String
+        +getType() String
+        +getValue() float
+        +getUnit() String
+        +getTimestamp() unsigned long
+    }
+
+    class Bouton {
+        -pin : int
+        -name : String
+        -lastState : bool
+        -debouncedState : bool
+        -pressed : bool
+        -lastDebounceTime : unsigned long
+        -debounceDelay : unsigned long
+        +Bouton(int pin, String name, unsigned long debounceDelay)
+        +begin()
+        +update()
+        +available() bool
+        +read() SensorData
+        +getName() String
+    }
+
+    class SerialOutput {
+        +SerialOutput()
+        +begin()
+        +send(SensorData data) bool
+        +getName() String
+    }
+
+    class DataValidator {
+        +isValid(SensorData data)$ bool
+        -isButtonValid(SensorData data)$ bool
+        -isSourceValid(String source)$ bool
+        -isTimestampValid(unsigned long timestamp)$ bool
+    }
+
+    class QuizState {
+        <<enumeration>>
+        ATTENTE
+        MANCHE
+        GAGNANT
+        REINITIALISATION
+        ERREUR
+    }
+
+    class QuizStateMachine {
+        -state : QuizState
+        -winner : int
+        -roundNumber : int
+        -roundStart : unsigned long
+        -dureeMax : unsigned long
+        -changed : bool
+        +QuizStateMachine(unsigned long dureeMaxManche)
+        +startRound()
+        +reset()
+        +onButtonPressed(int joueur)
+        +signalError()
+        +update()
+        +getState() QuizState
+        +getWinner() int
+        +getRoundNumber() int
+        +hasChanged() bool
+        +stateToString(QuizState state)$ String
+        -changeState(QuizState newState)
+    }
+
+    class Application {
+        -inputs : IInputSource*[MAX_INPUTS]
+        -outputs : IOutputTarget*[MAX_OUTPUTS]
+        -inputCount : int
+        -outputCount : int
+        -game : QuizStateMachine
+        +Application()
+        +addInput(IInputSource* input)
+        +addOutput(IOutputTarget* output)
+        +begin()
+        +update()
+        -handleSerialCommands()
+        -printStateChange()
+        -playerFromSource(String source)$ int
+    }
+
+    IInputSource <|.. Bouton
+    IOutputTarget <|.. SerialOutput
+
+    IInputSource ..> SensorData : produit
+    IOutputTarget ..> SensorData : consomme
+    DataValidator ..> SensorData : valide
+
+    Application "1" o-- "0..10" IInputSource : agrège
+    Application "1" o-- "0..10" IOutputTarget : agrège
+    Application "1" *-- "1" QuizStateMachine : possède
+    Application ..> DataValidator : utilise
+    QuizStateMachine --> QuizState : état courant

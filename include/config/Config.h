@@ -1,0 +1,8 @@
+#pragma once
+
+#define BOUTONJ1 35
+#define BOUTONJ2 36
+#define SERIAL_BAUD_RATE 115200
+#define DEBOUNCE_DELAY 50
+
+#define TIME_MAX_GAME_MS 15000
