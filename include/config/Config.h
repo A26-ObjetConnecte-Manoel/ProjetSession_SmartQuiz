@@ -11,3 +11,11 @@
 
 #define NOM_J1 "Joueur 1"
 #define NOM_J2 "Joueur 2"
+
+#define LED_J1_PIN 25
+#define LED_J2_PIN 26
+#define BUZZER_PIN 17
+
+#define BIP_COURT_MS 80
+#define BIP_VICTOIRE_MS 400
+#define BUZZER_FREQ_HZ 2000

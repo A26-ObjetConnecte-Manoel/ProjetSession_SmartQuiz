@@ -6,10 +6,15 @@
 #include "../include/input/boutonInput.h"
 #include "../include/output/SerialOutput.h"
 #include "../include/services/QuizStateService.h"
+#include "../include/tasks/BuzzerTask.h"
+#include "../include/tasks/WinnerLedTask.h"
 
 QuizStateService stateService(TIME_MAX_GAME_MS);
 Application app(DIAGNOSTIC_INTERVAL_MS, stateService);
 SerialOutput serialOutput;
+BuzzerTask buzzerTask(BUZZER_PIN, stateService);
+WinnerLedTask winnerLedTask1(LED_J1_PIN, 1, stateService);
+WinnerLedTask winnerLedTask2(LED_J2_PIN, 2, stateService);
 
 Bouton bouton1(BOUTONJ1, NOM_J1);
 Bouton bouton2(BOUTONJ2, NOM_J2);
@@ -25,6 +30,9 @@ void setup()
   app.addOutput(&serialOutput);
 
   app.begin();
+  buzzerTask.begin();
+  winnerLedTask1.begin();
+  winnerLedTask2.begin();
 
   Serial.println("SmartQuiz v0.3.0 - Machine a etats");
   Serial.println("Commandes : 's' = demarrer une manche, 'r' = reinitialiser");
@@ -33,4 +41,7 @@ void setup()
 void loop()
 {
   app.update();
+  buzzerTask.update();
+  winnerLedTask1.update();
+  winnerLedTask2.update();
 }
