@@ -1,5 +1,5 @@
 #pragma once
-
+#include "../config/config.h"
 #include <Arduino.h>
 #include "../interfaces/IInputSource.h"
 
@@ -7,6 +7,7 @@ class Bouton : public IInputSource
 {
 private:
     int pin;
+    String name;
 
     bool lastState;
     bool debouncedState;
@@ -16,7 +17,7 @@ private:
     unsigned long debounceDelay;
 
 public:
-    Bouton(int pin, unsigned long debounceDelay = 50);
+    Bouton(int pin, String name, unsigned long debounceDelay = DEBOUNCE_DELAY);
 
     void begin() override;
     void update();

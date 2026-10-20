@@ -10,8 +10,8 @@ Application app;
 
 SerialOutput serialOutput;
 
-Bouton bouton1(BOUTONJ1);
-Bouton bouton2(BOUTONJ2);
+Bouton bouton1(BOUTONJ1, "Joueur1");
+Bouton bouton2(BOUTONJ2, "Joueur2");
 
 void setup()
 {
@@ -25,7 +25,8 @@ void setup()
 
   app.begin();
 
-  Serial.println("Ariane V3 - Validation des donnees demarree.");
+  Serial.println("SmartQuiz v0.3.0 - Machine a etats");
+  Serial.println("Commandes : 's' = demarrer une manche, 'r' = reinitialiser");
 }
 
 void loop()
