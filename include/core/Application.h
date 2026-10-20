@@ -17,12 +17,14 @@ private:
     void updateInputs();
     void updateState();
     void updateDiagnostics();
+    void publishState();
     static int playerFromSource(const String &source);
 
     int inputCount;
     int outputCount;
     unsigned long lastDiagnosticMs;
     unsigned long diagnosticIntervalMs;
+    unsigned long lastStatePublishMs;
 
 public:
     Application(unsigned long diagnosticIntervalMs, QuizStateService &stateService);

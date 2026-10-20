@@ -37,4 +37,5 @@ public:
     int getWinner() const;
     int getRoundNumber() const;
     bool hasChanged();
+    unsigned long getRemainingMs() const;
 };

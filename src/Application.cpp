@@ -8,7 +8,8 @@ Application::Application(unsigned long diagnosticIntervalMs, QuizStateService &s
       inputCount(0),
       outputCount(0),
       lastDiagnosticMs(0),
-      diagnosticIntervalMs(diagnosticIntervalMs)
+      diagnosticIntervalMs(diagnosticIntervalMs),
+      lastStatePublishMs(0)
 
 {
     for (int i = 0; i < MAX_INPUTS; i++)
@@ -112,18 +113,44 @@ void Application::updateInputs()
 void Application::updateState()
 {
     stateService.update();
-    if (!stateService.hasChanged())
-        return;
-    Serial.print("[SmartQuiz] Etat: ");
-    Serial.print(stateService.getStateName());
-    Serial.print(" | manche ");
-    Serial.print(stateService.getRoundNumber());
-    if (stateService.getState() == QuizState::GAGNANT)
+
+    if (stateService.hasChanged())
     {
-        Serial.print(" | gagnant: J");
-        Serial.print(stateService.getWinner());
+        Serial.print("[SmartQuiz] Etat: ");
+        Serial.print(stateService.getStateName());
+        Serial.print(" | manche ");
+        Serial.print(stateService.getRoundNumber());
+
+        if (stateService.getState() == QuizState::GAGNANT)
+        {
+            Serial.print(" | gagnant: J");
+            Serial.print(stateService.getWinner());
+        }
+        Serial.println();
+
+        publishState();
     }
-    Serial.println();
+    else if (stateService.getState() == QuizState::MANCHE &&
+             millis() - lastStatePublishMs >= STATE_REFRESH_MS)
+    {
+        publishState(); // rafraîchit le compte à rebours
+    }
+}
+void Application::publishState()
+{
+    lastStatePublishMs = millis();
+
+    SensorData etat(
+        "SmartQuiz",
+        TYPE_ETAT,
+        (float)stateService.getState(), // index de l'état (0 = ATTENTE, 1 = MANCHE...)
+        stateService.getStateName(),    // nom lisible dans le champ unit
+        millis());
+
+    for (int j = 0; j < outputCount; j++)
+    {
+        outputs[j]->send(etat);
+    }
 }
 void Application::updateDiagnostics()
 {

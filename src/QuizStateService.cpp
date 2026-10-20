@@ -89,6 +89,14 @@ int QuizStateService::getRoundNumber() const
 {
     return roundNumber;
 }
+unsigned long QuizStateService::getRemainingMs() const
+{
+    if (currentState != QuizState::MANCHE)
+        return 0;
+
+    unsigned long elapsed = millis() - roundStartMs;
+    return elapsed >= maxRoundMs ? 0 : maxRoundMs - elapsed;
+}
 String QuizStateService::getStateName() const
 {
     switch (currentState)

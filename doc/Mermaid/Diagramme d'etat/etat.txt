@@ -1,0 +1,28 @@
+stateDiagram-v2
+    [*] --> ATTENTE
+
+    ATTENTE --> MANCHE : commande 's' 
+    MANCHE --> GAGNANT : premier joueur détecté
+    MANCHE --> REINITIALISATION : temps écoulé (TIME_MAX_GAME_MS)
+    MANCHE --> REINITIALISATION : commande 'r'
+    GAGNANT --> REINITIALISATION : commande 'r'
+    REINITIALISATION --> ATTENTE : après REINIT_DURATION_MS
+
+    ATTENTE --> ERREUR : donnée invalide
+    MANCHE --> ERREUR : donnée invalide
+    GAGNANT --> ERREUR : donnée invalide
+    REINITIALISATION --> ERREUR : donnée invalide
+
+    ERREUR --> ATTENTE : commande 'r'
+
+    note right of MANCHE
+        OLED : compte à rebours
+        Buzzer : bip court
+    end note
+
+    note right of GAGNANT
+        OLED : trophée + gagnant
+        DEL du gagnant allumée
+        Buzzer : bip long
+        Autres appuis ignorés
+    end note
