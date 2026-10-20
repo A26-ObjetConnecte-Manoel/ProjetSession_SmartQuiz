@@ -53,6 +53,26 @@ classDiagram
         +getName() String
     }
 
+    class OledOutput {
+        -display : DisplayService&
+        -stateService : const QuizStateService&
+        +OledOutput(DisplayService& display, const QuizStateService& stateService)
+        +begin()
+        +send(SensorData data) bool
+        +getName() String
+    }
+
+    class DisplayService {
+        -display : Adafruit_SSD1306&
+        -ready : bool
+        +DisplayService(Adafruit_SSD1306& display)
+        +begin()
+        +isReady() bool
+        +showMessage(String line1, String line2)
+        +showGameState(QuizState state, int round, int winner, unsigned long remainingMs)
+        -drawHeader(int round)
+    }
+
     class DataValidator {
         +isValid(SensorData data)$ bool
         -isButtonValid(SensorData data)$ bool
@@ -69,45 +89,76 @@ classDiagram
         ERREUR
     }
 
-    class QuizStateMachine {
-        -state : QuizState
+    class QuizStateService {
+        -currentState : QuizState
         -winner : int
         -roundNumber : int
-        -roundStart : unsigned long
-        -dureeMax : unsigned long
+        -roundStartMs : unsigned long
+        -stateStartMs : unsigned long
+        -maxRoundMs : unsigned long
         -changed : bool
-        +QuizStateMachine(unsigned long dureeMaxManche)
+        +QuizStateService(unsigned long maxRoundMs)
         +startRound()
         +reset()
-        +onButtonPressed(int joueur)
-        +signalError()
+        +onButtonPressed(int player)
+        +setError()
         +update()
         +getState() QuizState
+        +getStateName() String
         +getWinner() int
         +getRoundNumber() int
+        +getRemainingMs() unsigned long
         +hasChanged() bool
-        +stateToString(QuizState state)$ String
         -changeState(QuizState newState)
     }
 
     class Application {
         -inputs : IInputSource*[MAX_INPUTS]
         -outputs : IOutputTarget*[MAX_OUTPUTS]
+        -stateService : QuizStateService&
         -inputCount : int
         -outputCount : int
-        -game : QuizStateMachine
-        +Application()
+        -lastDiagnosticMs : unsigned long
+        -diagnosticIntervalMs : unsigned long
+        -lastStatePublishMs : unsigned long
+        +Application(unsigned long diagnosticIntervalMs, QuizStateService& stateService)
         +addInput(IInputSource* input)
         +addOutput(IOutputTarget* output)
         +begin()
         +update()
-        -handleSerialCommands()
-        -printStateChange()
+        -updateCommands()
+        -updateInputs()
+        -updateState()
+        -updateDiagnostic()
+        -publishState()
         -playerFromSource(String source)$ int
+    }
+
+    class WinnerLedTask {
+        -pin : int
+        -player : int
+        -stateService : const QuizStateService&
+        +WinnerLedTask(int pin, int player, const QuizStateService& stateService)
+        +begin()
+        +update()
+    }
+
+    class BuzzerTask {
+        -pin : int
+        -stateService : const QuizStateService&
+        -lastState : QuizState
+        -active : bool
+        -startMs : unsigned long
+        -durationMs : unsigned long
+        +BuzzerTask(int pin, const QuizStateService& stateService)
+        +begin()
+        +update()
+        -beep(unsigned long ms)
     }
 
     IInputSource <|.. Bouton
     IOutputTarget <|.. SerialOutput
+    IOutputTarget <|.. OledOutput
 
     IInputSource ..> SensorData : produit
     IOutputTarget ..> SensorData : consomme
@@ -115,6 +166,11 @@ classDiagram
 
     Application "1" o-- "0..10" IInputSource : agrège
     Application "1" o-- "0..10" IOutputTarget : agrège
-    Application "1" *-- "1" QuizStateMachine : possède
+    Application o-- QuizStateService : pilote
     Application ..> DataValidator : utilise
-    QuizStateMachine --> QuizState : état courant
+
+    OledOutput --> DisplayService : dessine avec
+    OledOutput --> QuizStateService : lit l'état
+    WinnerLedTask --> QuizStateService : lit l'état
+    BuzzerTask --> QuizStateService : lit l'état
+    QuizStateService --> QuizState : état courant
