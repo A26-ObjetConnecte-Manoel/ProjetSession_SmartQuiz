@@ -10,32 +10,31 @@ enum class QuizState
     ERREUR
 };
 
-class QuizStateMachine
+class QuizStateService
 {
 private:
-    void changeState(QuizState newState);
-
-    QuizState state;
+    QuizState currentState;
     int winner;
     int roundNumber;
-    unsigned long roundStart;
-    unsigned long dureeMax;
+    unsigned long roundStartMs;
+    unsigned long stateStartMs;
+    unsigned long maxRoundMs;
     bool changed;
-    unsigned long stateStartTime;
+
+    void changeState(QuizState newState);
 
 public:
-    QuizStateMachine(unsigned long dureeMaxManche);
+    QuizStateService(unsigned long maxRoundMs);
 
     void startRound();
     void reset();
-    void onButtonPressed(int joueur);
-    void signalError();
+    void onButtonPressed(int player);
+    void setError();
     void update();
 
     QuizState getState() const;
+    String getStateName() const;
     int getWinner() const;
     int getRoundNumber() const;
     bool hasChanged();
-
-    static String stateToString(QuizState state);
 };

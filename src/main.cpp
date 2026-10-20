@@ -5,13 +5,14 @@
 #include "../include/core/Application.h"
 #include "../include/input/boutonInput.h"
 #include "../include/output/SerialOutput.h"
+#include "../include/services/QuizStateService.h"
 
-Application app;
-
+QuizStateService stateService(TIME_MAX_GAME_MS);
+Application app(DIAGNOSTIC_INTERVAL_MS, stateService);
 SerialOutput serialOutput;
 
-Bouton bouton1(BOUTONJ1, "Joueur1");
-Bouton bouton2(BOUTONJ2, "Joueur2");
+Bouton bouton1(BOUTONJ1, NOM_J1);
+Bouton bouton2(BOUTONJ2, NOM_J2);
 
 void setup()
 {
