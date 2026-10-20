@@ -15,7 +15,7 @@ void WinnerLedTask::begin()
 
 void WinnerLedTask::update()
 {
-    // Allumée seulement si ce joueur a gagné la manche en cours
+
     bool on = stateService.getState() == QuizState::GAGNANT &&
               stateService.getWinner() == player;
 
