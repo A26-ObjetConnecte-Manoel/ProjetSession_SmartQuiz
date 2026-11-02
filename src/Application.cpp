@@ -133,7 +133,7 @@ void Application::updateState()
     else if (stateService.getState() == QuizState::MANCHE &&
              millis() - lastStatePublishMs >= STATE_REFRESH_MS)
     {
-        publishState(); // rafraîchit le compte à rebours
+        publishState(); 
     }
 }
 void Application::publishState()
@@ -143,8 +143,8 @@ void Application::publishState()
     SensorData etat(
         "SmartQuiz",
         TYPE_ETAT,
-        (float)stateService.getState(), // index de l'état (0 = ATTENTE, 1 = MANCHE...)
-        stateService.getStateName(),    // nom lisible dans le champ unit
+        (float)stateService.getState(),
+        stateService.getStateName(),    
         millis());
 
     for (int j = 0; j < outputCount; j++)
