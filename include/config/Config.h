@@ -27,3 +27,15 @@
 
 #define TYPE_BOUTON "bouton"
 #define TYPE_ETAT "etat"
+
+#define WIFI_RECONNECT_INTERVAL_MS 5000
+#define WIFI_SSID "EcoleDuWeb2.4g"
+#define WIFI_PASSWORD "EcoleDuWEB@@"
+
+#define MQTT_HOST "mqtt.manoelt.lab.edwrdl.ca"
+#define MQTT_PORT 1883
+#define MQTT_CLIENT_ID "smartQuizStation01"
+#define MQTT_TOPIC "smartQuiz/station01/observations"
+#define MQTT_RETRY_INTERVAL_MS 5000
+#define MQTT_USERNAME "manoel"
+#define MQTT_PASSWORD "Manoel2003"

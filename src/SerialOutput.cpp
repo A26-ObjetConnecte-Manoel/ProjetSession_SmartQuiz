@@ -1,4 +1,4 @@
-#include "../include/output/SerialOutput.h"
+#include "../include/outputs/SerialOutput.h"
 #include <Arduino.h>
 
 SerialOutput::SerialOutput()

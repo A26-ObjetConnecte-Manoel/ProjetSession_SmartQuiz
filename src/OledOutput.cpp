@@ -1,5 +1,5 @@
 #include "../include/config/Config.h"
-#include "../include/output/OledOutput.h"
+#include "../include/outputs/OledOutput.h"
 
 OledOutput::OledOutput(DisplayService &display, const QuizStateService &stateService)
     : display(display),
@@ -17,10 +17,8 @@ bool OledOutput::send(const SensorData &data)
     if (!display.isReady())
         return false;
 
-  
     if (data.getType() != TYPE_ETAT)
         return true;
-
 
     display.showGameState(
         stateService.getState(),
