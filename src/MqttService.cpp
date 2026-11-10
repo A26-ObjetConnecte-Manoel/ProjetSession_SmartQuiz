@@ -13,6 +13,8 @@ void MqttService::begin()
     client.setServer(broker, port);
     client.setSocketTimeout(2);
     client.setBufferSize(512);
+    client.setCallback([this](char *topic, byte *payload, unsigned int length)
+                       { onMessage(topic, payload, length); });
 }
 
 void MqttService::update()
@@ -42,7 +44,12 @@ void MqttService::update()
     {
         lastAttemptMs = millis();
 
-        if (!client.connect(clientId, username, password))
+        if (client.connect(clientId, username, password))
+        {
+            client.subscribe(TOPIC_CMD);
+            client.subscribe(TOPIC_CONFIG);
+        }
+        else
         {
             Serial.printf("[MQTT] Echec, state = %d\n", client.state());
         }
@@ -60,3 +67,16 @@ bool MqttService::isConnected()
 {
     return client.connected();
 }
+void MqttService::onMessage(char *topic, byte *payload, unsigned int length)
+{
+    pendingTopic = String(topic);
+    pendingPayload = "";
+    for (unsigned int i = 0; i < length; i++)
+        pendingPayload += (char)payload[i];
+    messagePending = true;
+}
+
+bool MqttService::hasMessage() const { return messagePending; }
+String MqttService::getMessageTopic() const { return pendingTopic; }
+String MqttService::getMessagePayload() const { return pendingPayload; }
+void MqttService::clearMessage() { messagePending = false; }

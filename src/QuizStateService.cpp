@@ -11,14 +11,16 @@ QuizStateService::QuizStateService(unsigned long maxRoundMs)
       changed(true)
 {
 }
-void QuizStateService::startRound()
+bool QuizStateService::startRound()
 {
     if (currentState == QuizState::ATTENTE)
     {
         roundNumber++;
         roundStartMs = millis();
         changeState(QuizState::MANCHE);
+        return true;
     }
+    return false;
 }
 void QuizStateService::onButtonPressed(int player)
 {
@@ -32,16 +34,23 @@ void QuizStateService::onButtonPressed(int player)
         changeState(QuizState::GAGNANT);
     }
 }
-void QuizStateService::reset()
+bool QuizStateService::reset()
 {
     if (currentState == QuizState::MANCHE || currentState == QuizState::GAGNANT)
     {
         changeState(QuizState::REINITIALISATION);
+        return true;
     }
     else if (currentState == QuizState::ERREUR)
     {
         changeState(QuizState::ATTENTE);
+        return true;
     }
+    return false;
+}
+void QuizStateService::setMaxRoundMs(unsigned long ms)
+{
+    maxRoundMs = ms;
 }
 void QuizStateService::setError()
 {

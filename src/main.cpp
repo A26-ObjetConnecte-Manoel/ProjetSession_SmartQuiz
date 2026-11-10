@@ -2,6 +2,7 @@
 #include <Wire.h>
 
 #include "../include/config/Config.h"
+#include "../include/config/Secret.h"
 #include "../include/core/Application.h"
 #include "../include/input/boutonInput.h"
 #include "../include/outputs/SerialOutput.h"
@@ -16,7 +17,9 @@
 #include "../include/services/JsonService.h"
 
 QuizStateService stateService(TIME_MAX_GAME_MS);
-Application app(DIAGNOSTIC_INTERVAL_MS, stateService);
+WifiService wifiService(WIFI_SSID, WIFI_PASSWORD);
+MqttService mqttService(wifiService, MQTT_HOST, MQTT_PORT, MQTT_CLIENT_ID, MQTT_USERNAME, MQTT_PASSWORD);
+Application app(DIAGNOSTIC_INTERVAL_MS, stateService, mqttService);
 
 Bouton bouton1(BOUTONJ1, NOM_J1);
 Bouton bouton2(BOUTONJ2, NOM_J2);
@@ -25,8 +28,6 @@ SerialOutput serialOutput;
 Adafruit_SSD1306 oled(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 DisplayService displayService(oled);
 OledOutput oledOutput(displayService, stateService);
-WifiService wifiService(WIFI_SSID, WIFI_PASSWORD);
-MqttService mqttService(wifiService, MQTT_HOST, MQTT_PORT, MQTT_CLIENT_ID, MQTT_USERNAME, MQTT_PASSWORD);
 
 MqttOutput mqttOutput(mqttService, stateService, MQTT_TOPIC);
 

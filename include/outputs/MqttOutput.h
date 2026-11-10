@@ -10,6 +10,7 @@ private:
     MqttService &mqttService;
     QuizStateService &stateService;
     const char *topic;
+    int lastResultRound = 0;
 
 public:
     MqttOutput(MqttService &mqttService, QuizStateService &stateService, const char *topic);

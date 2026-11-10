@@ -29,13 +29,15 @@
 #define TYPE_ETAT "etat"
 
 #define WIFI_RECONNECT_INTERVAL_MS 5000
-#define WIFI_SSID "EcoleDuWeb2.4g"
-#define WIFI_PASSWORD "EcoleDuWEB@@"
 
-#define MQTT_HOST "mqtt.manoelt.lab.edwrdl.ca"
-#define MQTT_PORT 1883
 #define MQTT_CLIENT_ID "smartQuizStation01"
 #define MQTT_TOPIC "smartQuiz/station01/observations"
 #define MQTT_RETRY_INTERVAL_MS 5000
-#define MQTT_USERNAME "manoel"
-#define MQTT_PASSWORD "Manoel2003"
+
+#define TOPIC_DATA "ariane/smartquiz/data"     // résultat de chaque manche
+#define TOPIC_CMD "ariane/smartquiz/cmd"       // démarrer / réinitialiser
+#define TOPIC_CONFIG "ariane/smartquiz/config" // durée maximale
+#define TOPIC_ACK "ariane/smartquiz/ack"       // confirmation
+
+#define DUREE_MIN_S 5 // durée max acceptée en configuration
+#define DUREE_MAX_S 120
