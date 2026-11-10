@@ -2,6 +2,7 @@
 #include "../interfaces/IInputSource.h"
 #include "../interfaces/IOutputTarget.h"
 #include "../services/QuizStateService.h"
+#include "../services/MqttService.h"
 
 const int MAX_INPUTS = 10;
 const int MAX_OUTPUTS = 10;
@@ -12,11 +13,13 @@ private:
     IInputSource *inputs[MAX_INPUTS];
     IOutputTarget *outputs[MAX_OUTPUTS];
     QuizStateService &stateService;
+    MqttService &mqttService;
 
     void updateCommands();
     void updateInputs();
     void updateState();
     void updateDiagnostics();
+    void updateMqttCommands();
     void publishState();
     static int playerFromSource(const String &source);
 
@@ -27,7 +30,8 @@ private:
     unsigned long lastStatePublishMs;
 
 public:
-    Application(unsigned long diagnosticIntervalMs, QuizStateService &stateService);
+    Application(unsigned long diagnosticIntervalMs, QuizStateService &stateService,
+                MqttService &mqttService);
 
     void addInput(IInputSource *input);
     void addOutput(IOutputTarget *output);

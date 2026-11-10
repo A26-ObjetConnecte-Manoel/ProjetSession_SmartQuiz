@@ -26,8 +26,9 @@ private:
 public:
     QuizStateService(unsigned long maxRoundMs);
 
-    void startRound();
-    void reset();
+    bool startRound();
+    bool reset();
+    void setMaxRoundMs(unsigned long ms);
     void onButtonPressed(int player);
     void setError();
     void update();

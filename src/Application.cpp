@@ -2,9 +2,12 @@
 #include <Arduino.h>
 #include "../include/config/Config.h"
 #include "../include/services/DataValidator.h"
+#include "../include/services/JsonService.h"
 
-Application::Application(unsigned long diagnosticIntervalMs, QuizStateService &stateService)
+Application::Application(unsigned long diagnosticIntervalMs, QuizStateService &stateService, MqttService &mqttService)
     : stateService(stateService),
+      mqttService(mqttService),
+
       inputCount(0),
       outputCount(0),
       lastDiagnosticMs(0),
@@ -64,6 +67,7 @@ void Application::addOutput(IOutputTarget *output)
 void Application::update()
 {
     updateCommands();
+    updateMqttCommands();
     updateInputs();
     updateState();
     updateDiagnostics();
@@ -133,7 +137,7 @@ void Application::updateState()
     else if (stateService.getState() == QuizState::MANCHE &&
              millis() - lastStatePublishMs >= STATE_REFRESH_MS)
     {
-        publishState(); 
+        publishState();
     }
 }
 void Application::publishState()
@@ -144,7 +148,7 @@ void Application::publishState()
         "SmartQuiz",
         TYPE_ETAT,
         (float)stateService.getState(),
-        stateService.getStateName(),    
+        stateService.getStateName(),
         millis());
 
     for (int j = 0; j < outputCount; j++)
@@ -166,6 +170,61 @@ void Application::updateDiagnostics()
         Serial.print("[SmartQuiz] Etat: ");
         Serial.println(stateService.getStateName());
     }
+}
+void Application::updateMqttCommands()
+{
+    if (!mqttService.hasMessage())
+        return;
+
+    String topic = mqttService.getMessageTopic();
+    String payload = mqttService.getMessagePayload();
+    mqttService.clearMessage();
+
+    // 1. Validation avant exécution
+    Command command = JsonService::parseCommand(topic, payload);
+
+    // 2. Exécution
+    String statut = "ok";
+    String message;
+
+    if (command.type == CommandType::START)
+    {
+        if (stateService.startRound())
+            message = "Manche demarree";
+        else
+        {
+            statut = "refuse";
+            message = "Manche deja en cours";
+        }
+    }
+    else if (command.type == CommandType::RESET)
+    {
+        if (stateService.reset())
+            message = "Manche reinitialisee";
+        else
+        {
+            statut = "refuse";
+            message = "Rien a reinitialiser";
+        }
+    }
+    else if (command.type == CommandType::CONFIG)
+    {
+        stateService.setMaxRoundMs(command.dureeMaxS * 1000UL);
+        message = "Duree maximale : " + String(command.dureeMaxS) + " s";
+    }
+    else
+    {
+        statut = "invalide"; // message rejeté, rien n'est modifié
+        message = command.error;
+    }
+
+    // 3. Confirmation
+    mqttService.publish(TOPIC_ACK, JsonService::buildAck(command.name, statut, message));
+
+    Serial.print("[ACK] ");
+    Serial.print(statut);
+    Serial.print(" : ");
+    Serial.println(message);
 }
 int Application::playerFromSource(const String &source)
 {
