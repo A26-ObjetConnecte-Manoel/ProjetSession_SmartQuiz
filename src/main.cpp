@@ -17,7 +17,7 @@
 #include "../include/services/JsonService.h"
 
 QuizStateService stateService(TIME_MAX_GAME_MS);
-WifiService wifiService(WIFI_SSID, WIFI_PASSWORD);
+WifiService wifiService;
 MqttService mqttService(wifiService, MQTT_HOST, MQTT_PORT, MQTT_CLIENT_ID, MQTT_USERNAME, MQTT_PASSWORD);
 Application app(DIAGNOSTIC_INTERVAL_MS, stateService, mqttService);
 
@@ -40,8 +40,6 @@ void setup()
   Serial.begin(SERIAL_BAUD_RATE);
 
   delay(1000);
-
-  wifiService.begin();
 
   app.addInput(&bouton1);
   app.addInput(&bouton2);

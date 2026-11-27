@@ -29,6 +29,7 @@
 #define TYPE_ETAT "etat"
 
 #define WIFI_RECONNECT_INTERVAL_MS 5000
+#define WIFI_CONFIG_PORTAL_TIMEOUT_MS 180000
 
 #define MQTT_CLIENT_ID "smartQuizStation01"
 #define MQTT_TOPIC "ariane/smartquiz/state"

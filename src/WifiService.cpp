@@ -1,22 +1,46 @@
 #include "../include/services/WifiService.h"
 #include "../include/config/Config.h"
-#include <WiFi.h>
+#include "../include/config/secret.h"
 
-WifiService::WifiService(const char *ssid, const char *password)
-    : ssid(ssid), password(password)
-{
-}
 void WifiService::begin()
 {
+
     WiFi.mode(WIFI_STA);
     WiFi.setAutoReconnect(false);
-    WiFi.begin(ssid, password);
+    wm.setConfigPortalBlocking(false);
+    wm.setConfigPortalTimeout(WIFI_CONFIG_PORTAL_TIMEOUT_MS);
+
+    if (wm.autoConnect(WIFI_AP_NAME, WIFI_AP_PASSWORD))
+    {
+        Serial.println("[WIFI] Connecte : " + WiFi.localIP().toString());
+    }
+    else
+    {
+        Serial.println("[WIFI] Portail de configuration ouvert : " WIFI_AP_NAME);
+    }
     lastAttemptMs = millis();
+    wasConnected = isconnected();
 }
+
 void WifiService::update()
 {
-    if (WiFi.status() != WL_CONNECTED && millis() - lastAttemptMs >= WIFI_RECONNECT_INTERVAL_MS)
+    wm.process();
+
+    bool connected = isconnected();
+    if (connected && !wasConnected)
     {
+        Serial.println("[WIFI] Connecte : " + WiFi.localIP().toString());
+    }
+    if (!connected && wasConnected)
+    {
+        Serial.println("[WIFI] Connexion perdue");
+    }
+    wasConnected = connected;
+
+    if (!connected && !wm.getConfigPortalActive() &&
+        millis() - lastAttemptMs >= WIFI_RECONNECT_INTERVAL_MS)
+    {
+        Serial.println("[WIFI] Tentative de reconnexion...");
         WiFi.reconnect();
         lastAttemptMs = millis();
     }
