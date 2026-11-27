@@ -16,7 +16,7 @@ String JsonService::toJson(const SensorData data, String stateName)
     serializeJson(doc, json);
     return json;
 }
-// Résultat d'une manche (topic data)
+
 String JsonService::buildResult(int round, int winner)
 {
     JsonDocument doc;
@@ -29,7 +29,6 @@ String JsonService::buildResult(int round, int winner)
     return json;
 }
 
-// Confirmation d'une commande (topic ack)
 String JsonService::buildAck(const String &name, const String &statut, const String &message)
 {
     JsonDocument doc;
@@ -43,7 +42,6 @@ String JsonService::buildAck(const String &name, const String &statut, const Str
     return json;
 }
 
-// Lecture et validation d'une commande reçue
 Command JsonService::parseCommand(const String &topic, const String &payload)
 {
     Command command;

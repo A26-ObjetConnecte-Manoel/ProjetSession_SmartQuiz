@@ -31,7 +31,7 @@
 #define WIFI_RECONNECT_INTERVAL_MS 5000
 
 #define MQTT_CLIENT_ID "smartQuizStation01"
-#define MQTT_TOPIC "smartQuiz/station01/observations"
+#define MQTT_TOPIC "ariane/smartquiz/state"
 #define MQTT_RETRY_INTERVAL_MS 5000
 
 #define TOPIC_DATA "ariane/smartquiz/data"     // résultat de chaque manche
