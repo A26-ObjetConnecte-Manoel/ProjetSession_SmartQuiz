@@ -219,6 +219,7 @@ void Application::updateMqttCommands()
     }
 
     // 3. Confirmation
+
     mqttService.publish(TOPIC_ACK, JsonService::buildAck(command.name, statut, message));
 
     Serial.print("[ACK] ");
